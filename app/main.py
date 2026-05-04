@@ -3,6 +3,7 @@ from app.database import engine
 from app import models
 from app.routers.users import router as users_router
 from app.routers.tasks import router as tasks_router
+from app.routers.auth import router as auth_router 
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -18,3 +19,4 @@ def get_status():
 
 app.include_router(users_router)
 app.include_router(tasks_router)
+app.include_router(auth_router)

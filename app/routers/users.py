@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
+from app.auth import hash_password
 
 router = APIRouter(
     prefix="/users",
@@ -22,7 +23,10 @@ def crear_users(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user is not None:
         raise HTTPException(status_code=409, detail='Error el usuario ya existe')
-    new_user = User(**user.model_dump())
+    
+    user_dict = user.model_dump()
+    user_dict['password'] = hash_password(user.password)
+    new_user = User(**user_dict)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
