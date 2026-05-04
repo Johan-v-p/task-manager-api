@@ -20,3 +20,4 @@ def get_status():
 app.include_router(users_router)
 app.include_router(tasks_router)
 app.include_router(auth_router)
+
