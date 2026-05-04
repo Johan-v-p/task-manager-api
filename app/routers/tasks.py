@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Task
+from app.auth import get_usuario_actual
+from app.models import Task, User
 from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse
 
 router = APIRouter(
@@ -16,12 +17,17 @@ def get_tasks(db: Session = Depends(get_db)):
     return tasks
 
 @router.post("/", response_model=TaskResponse)
-def crear_task(task: TaskCreate, db: Session = Depends(get_db)):
+def crear_task(task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_usuario_actual) ):
     """Crea tareas nueva"""
-    db_task = db.query(Task).filter(Task.user_id == task.user_id).filter(Task.title == task.title).first()
+    db_task = db.query(Task).filter(Task.user_id == current_user.id).filter(Task.title == task.title).first()
     if db_task is not None:
         raise HTTPException(status_code=409, detail="Error la tarea ya existe")
-    new_task = Task(**task.model_dump())
+    
+
+    task_dict = task.model_dump()
+    task_dict["user_id"] = current_user.id
+
+    new_task = Task(**task_dict)
     db.add(new_task)
     db.commit()
     db.refresh(new_task)

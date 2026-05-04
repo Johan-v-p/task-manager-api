@@ -6,7 +6,7 @@ class TaskCreate(BaseModel):
     title: str
     description: str
     status: str
-    user_id: int
+    
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None

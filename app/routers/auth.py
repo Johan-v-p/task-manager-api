@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.auth import AuthCreate
 from app.models import User
 from app.auth import verify_password, create_access_token
+from fastapi.security import OAuth2PasswordRequestForm
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
 
-@router.post("/")
-def login(login: AuthCreate, db: Session = Depends(get_db)):
+@router.post("/login")
+def login(login: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm), db: Session = Depends(get_db)):
     """Retorna el token de acceso"""
-    db_email = db.query(User).filter(User.email == login.email).first()
+    db_email = db.query(User).filter(User.email == login.username).first()
     if db_email is None:
         raise HTTPException(status_code=401, detail='Error el usuario no existe')
     
